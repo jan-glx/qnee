@@ -6,7 +6,6 @@
 
 #define BUFFER_SIZE (8192*8)
 
-#define BARCODE_LENGTH 16
 unsigned int cbc_length;
 
 class Node {
@@ -38,33 +37,32 @@ public:
     void increment_count() {
         count++;
     }
-    void print(unsigned int level){
-        if (level == 0)
+    void print(unsigned int depth_to_be_printed){
+        if (depth_to_be_printed == 0)
             std::cout << count << "\n";
         else{
-            level--;
+            depth_to_be_printed--;
             if (A!=nullptr)
-                A->print(level);
+                A->print(depth_to_be_printed);
             if (C!=nullptr)
-                C->print(level);
+                C->print(depth_to_be_printed);
             if (G!=nullptr)
-                G->print(level);
+                G->print(depth_to_be_printed);
             if (T!=nullptr)
-                T->print(level);
+                T->print(depth_to_be_printed);
         }
-
     }
 };
 
 Node root = Node();
 
-int parse_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
+int parse_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
     while (true) {
-        for (; i<size; ) {
+        for (; i<valid_size; ) {
             if (buffer[i++]=='\n')
                 return EXIT_SUCCESS;
         }
-        if (0>=(size = fread(buffer, 1, sizeof(buffer), stdin))) {
+        if (0>=(valid_size = fread(buffer, 1, sizeof(buffer), stdin))) {
             std::cerr << "premature end of file";
             return EXIT_FAILURE;
         }
@@ -73,9 +71,9 @@ int parse_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
 }
 
 
-int parse_plus_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
-    if (i>=size){
-        if(0 >= (size = fread(buffer, 1, sizeof(buffer), stdin)))
+int parse_plus_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
+    if (i>=valid_size){
+        if(0 >= (valid_size = fread(buffer, 1, sizeof(buffer), stdin)))
             return EXIT_FAILURE;
         i = 0;
     }
@@ -83,20 +81,20 @@ int parse_plus_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
         std::cerr << "line does not start  with '+'" << std::endl;
         return EXIT_FAILURE;
     }
-    return parse_line(buffer, i, size);
+    return parse_line(buffer, i, valid_size);
 }
 
 
-int parse_barcode(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
+int parse_barcode_and_add_to_tree(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
     Node *ptr = &root;
     ptr->increment_count();
     unsigned int j = cbc_length;
     while (true) {
-        for (; i<size; i++) {
+        for (; i<valid_size; i++) {
             ptr = ptr->get_child(buffer[i]);
             if (ptr == nullptr) {
                 if(buffer[i]=='N')
-                    return parse_line(buffer, i, size);
+                    return parse_line(buffer, i, valid_size);
                 else {
                     std::cerr << "barcode contains: " << buffer[i] << std::endl;
                     return EXIT_FAILURE;
@@ -105,11 +103,11 @@ int parse_barcode(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
             ptr->increment_count();
             j--;
             if (j == 0) {
-                return parse_line(buffer, i, size);
+                return parse_line(buffer, i, valid_size);
             }
         }
         i = 0;
-        if (0>=(size = fread(buffer, 1, sizeof(buffer), stdin))) {
+        if (0>=(valid_size = fread(buffer, 1, sizeof(buffer), stdin))) {
             std::cerr << "premature end of file";
             return EXIT_FAILURE;
         }
@@ -117,38 +115,29 @@ int parse_barcode(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
 }
 
 
-int parse_at_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
-    if (i>=size){
+int parse_at_line(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
+    if (i>=valid_size){
         i = 0;
-        if(0 >= (size = fread(buffer, 1, sizeof(buffer), stdin)))
+        if(0 >= (valid_size = fread(buffer, 1, sizeof(buffer), stdin)))
             return EXIT_FAILURE;
     }
     if (buffer[i++]!='@'){
         std::cerr << "line does not start  with '@'" << std::endl;
         return EXIT_FAILURE;
     }
-    return parse_line(buffer, i, size);
+    return parse_line(buffer, i, valid_size);
 }
 
-int parse_eof(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &size){
-    if (i>=size){
+int parse_eof(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
+    if (i>=valid_size){
         i = 0;
-        if(0 >= (size = fread(buffer, 1, sizeof(buffer), stdin)))
+        if(0 >= (valid_size = fread(buffer, 1, sizeof(buffer), stdin)))
             return EXIT_SUCCESS;
     }
     return EXIT_FAILURE;
 }
 
 int main() {
-    /*std::istringstream debug_in("@NB551291:5:H2KCYBGX7:1:11101:7613:1054 1:N:0:1\n"
-                                "ATGCGNTCAGACGCTCTGCTAGTCCT\n"
-                                "+\n"
-                                "6AAAA#EEAEEEEEEEEEAEEEEEEE\n"
-                                "@NB551291:5:H2KCYBGX7:1:11101:4427:1054 1:N:0:1\n"
-                                "AGCTTNACAATGGAGCGACCGCAGTA\n"
-                                "+\n"
-                                "AAAAA#EEEEEEEEEEEEEEEEEEEE\n");*/
-//std::cin.rdbuf(debug_in.rdbuf());
 #ifndef NDEBUG
     FILE * tmp = freopen("debugInput.txt","r", stdin);
     if (tmp == nullptr)
@@ -161,14 +150,14 @@ int main() {
 #endif
     cbc_length = 16;
     char buffer[BUFFER_SIZE];
-    size_t size = 0;
-    size_t i = 0;
+    size_t valid_size = 0;  // valid_size of the valid part of the buffer
+    size_t i = 0; // courser (current postiion in buffer)
     int ret = EXIT_SUCCESS;
-    while (parse_eof(buffer, i , size)==EXIT_FAILURE) {
-        ret = parse_at_line(buffer, i, size) ||
-              parse_barcode(buffer, i, size) ||
-              parse_plus_line(buffer, i, size) ||
-              parse_line(buffer, i, size);
+    while (parse_eof(buffer, i , valid_size)==EXIT_FAILURE) {
+        ret = parse_at_line(buffer, i, valid_size) ||                 // @ID....
+              parse_barcode_and_add_to_tree(buffer, i, valid_size) || // ATTCGC...
+              parse_plus_line(buffer, i, valid_size) ||               // +
+              parse_line(buffer, i, valid_size);                      // ///777788899 ....
     }
     root.print(cbc_length);
     return ret;
