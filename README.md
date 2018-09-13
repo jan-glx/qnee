@@ -1,10 +1,17 @@
 # qnee
 Quick pre-QC knee plots for barcode based scRNAseq data
 
-## Usage
+## Installation
 ### Linux/ WSL
-Compile `qnee` using e.g. `g++ -std=c++11 main.cpp -o qnee -DNDEBUG` or download a suitable binary from <TODO>.
-Then run `qnee` supplying a `fastq` file for read one (cell barcode + UMI) on std_in and receiving the number of reads for each cell barcode as a text file on std_out using e.g. `zcat input_R1.fastq.gz | ./qnee > output.csv`.
+Compile `qnee` using e.g. 
+````
+g++ -std=c++11 main.cpp -o qnee -DNDEBUG`
+````
+## Usage
+Run `qnee` supplying a `fastq` file for read 1 (cell barcode + UMI) on std_in and receiving the number of reads for each cell barcode as a text file on std_out:
+````
+zcat input_R1.fastq.gz | ./qnee > output.csv
+````
 Finally load and plot the aggregated counts in you favourite analysis tool. E.g., in R you can do:
 ```
 library(ggplot2)
