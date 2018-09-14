@@ -2,8 +2,8 @@
 Quick pre-QC knee plots for barcode based scRNAseq data
 
 ## Installation
-### Linux/ WSL
-Compile `qnee` using e.g. 
+### Mac/Linux/Windows(using WSL)
+Dowload [`main.cpp`](main.cpp) and compile `qnee` using e.g. 
 ````
 g++ -std=c++11 main.cpp -o qnee -DNDEBUG`
 ````
