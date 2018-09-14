@@ -1,5 +1,5 @@
 # qnee
-Quick pre-QC knee plots for barcode based scRNAseq data
+Quick pre-QC knee plots for barcode-based scRNAseq data
 
 ## Installation
 ### Mac/Linux/Windows(using WSL)
