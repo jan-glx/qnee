@@ -138,16 +138,6 @@ int parse_eof(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
 }
 
 int main() {
-#ifndef NDEBUG
-    FILE * tmp = freopen("debugInput.txt","r", stdin);
-    if (tmp == nullptr)
-        return EXIT_FAILURE;
-#endif
-#ifdef FALSE
-    FILE * tmp_out = freopen("debugOutput.txt","w", stdout);
-    if (tmp_out == nullptr)
-        return EXIT_FAILURE;
-#endif
     cbc_length = 16;
     char buffer[BUFFER_SIZE];
     size_t valid_size = 0;  // valid_size of the valid part of the buffer
