@@ -137,8 +137,19 @@ int parse_eof(char (&buffer)[BUFFER_SIZE], size_t &i, size_t &valid_size){
     return EXIT_FAILURE;
 }
 
-int main() {
-    cbc_length = 16;
+int main(int argc, char* argv[]) {
+    try {
+        std::string arg = argv[1];
+        if (argc!=2) throw std::exception();
+        std::size_t pos;
+        int x = std::stoi(arg, &pos);
+        if (pos < arg.size()) throw std::exception();
+        if (x<=0 || x>1000) throw std::exception();
+        cbc_length = (unsigned int) x;
+    } catch (...) {
+        std::cerr << "Usage: <cat input.fastq> | " << argv[0] << " <length of cell barcode (16 for 10X chromium v2)>" << '\n';
+        return EXIT_FAILURE;
+    }
     char buffer[BUFFER_SIZE];
     size_t valid_size = 0;  // valid_size of the valid part of the buffer
     size_t i = 0; // courser (current postiion in buffer)
