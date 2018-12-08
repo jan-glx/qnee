@@ -5,7 +5,7 @@ Quick pre-QC knee plots for barcode-based scRNAseq data
 ### Mac/Linux/Windows(using WSL)
 Dowload [`main.cpp`](main.cpp) and compile `qnee` using e.g. 
 ````
-g++ -std=c++11 main.cpp -o qnee -DNDEBUG`
+g++ -std=c++11 main.cpp -o qnee -DNDEBUG
 ````
 ## Usage
 Run `qnee` with the length of cellbarcodes as only parameter supplying a `fastq` file for read 1 (cell barcode + UMI) on std_in and receiving the number of reads for each cell barcode as a text file on std_out:
